@@ -1,6 +1,7 @@
 #pragma semicolon 1
 
 #include <amxmodx>
+#include <cstrike>
 
 /* If you want players to save the crosshair they chose, define NVAULT_SAVE. It will use nvault.inc */
 #define NVAULT_SAVE
@@ -35,6 +36,8 @@ new
 	bool:g_scope[MAX_PLAYERS + 1],
 	g_msgids[4];
 
+new g_cvar_sniper;
+
 public plugin_init() 
 {
 	register_plugin(PLUGIN_NAME, PLUGIN_VERS, PLUGIN_AUTH);
@@ -45,10 +48,13 @@ public plugin_init()
 	register_event("SetFOV", "@Event_SetFOV", "be");
 	register_event("CurWeapon", "@Event_CurWeapon", "be", "1=1", "2!18");
 
-	g_msgids[0] = get_user_msgid("HideWeapon");
-	g_msgids[1] = get_user_msgid("WeaponList");
-	g_msgids[2] = get_user_msgid("SetFOV");
-	g_msgids[3] = get_user_msgid("CurWeapon");
+	// Crosshair on Snipers. 
+	bind_pcvar_num(create_cvar("crosshair_snipers", "0"), g_cvar_sniper);
+
+	g_msgids[0]   = get_user_msgid("HideWeapon");
+	g_msgids[1]   = get_user_msgid("WeaponList");
+	g_msgids[2]   = get_user_msgid("SetFOV");
+	g_msgids[3]   = get_user_msgid("CurWeapon");
 }
 
 @Event_SetFOV(const id) 
@@ -183,6 +189,11 @@ Change_Crosshair(const id, const weapon, const zoom = 90)
 	{
 		case CSW_P228: 
 			SetMessage_WeaponList(id, 9, 52);
+		case CSW_SCOUT:
+			if (g_cvar_sniper)
+			{
+				SetMessage_WeaponList(id, 2, 90);
+			}
 		case CSW_HEGRENADE: 
 			SetMessage_WeaponList(id, 12, 1);
 		case CSW_XM1014: 
@@ -199,6 +210,11 @@ Change_Crosshair(const id, const weapon, const zoom = 90)
 			SetMessage_WeaponList(id, 10, 120);
 		case CSW_FIVESEVEN: 
 			SetMessage_WeaponList(id, 7, 100);
+		case CSW_SG550:
+			if (g_cvar_sniper)
+			{
+				SetMessage_WeaponList(id, 4, 90);
+			}
 		case CSW_UMP45: 
 			SetMessage_WeaponList(id, 6, 100);
 		case CSW_GALIL: 
@@ -209,6 +225,11 @@ Change_Crosshair(const id, const weapon, const zoom = 90)
 			SetMessage_WeaponList(id, 6, 100);
 		case CSW_GLOCK18: 
 			SetMessage_WeaponList(id, 10, 120);
+		case CSW_AWP:
+			if (g_cvar_sniper)
+			{
+				SetMessage_WeaponList(id, 1, 30);
+			}
 		case CSW_MP5NAVY: 
 			SetMessage_WeaponList(id, 10, 120);
 		case CSW_M249: 
@@ -219,6 +240,11 @@ Change_Crosshair(const id, const weapon, const zoom = 90)
 			SetMessage_WeaponList(id, 4, 90);
 		case CSW_TMP: 
 			SetMessage_WeaponList(id, 10, 120);
+		case CSW_G3SG1:
+			if (g_cvar_sniper)
+			{
+				SetMessage_WeaponList(id, 2, 90);
+			}
 		case CSW_FLASHBANG: 
 			SetMessage_WeaponList(id, 11, 2);
 		case CSW_DEAGLE: 
