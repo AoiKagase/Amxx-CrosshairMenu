@@ -30,13 +30,57 @@ new const colors[][] =
 	"Cyan"
 };
 
+// AmmoID, MaxAmmo
+new const gAmmo[][] =
+{
+	{-1,  -1,-1},// #define CSW_NONE            0
+	{ 9,  52, 1},// #define CSW_P228            1
+	{-1,  -1,-1},// #define CSW_GLOCK           2  // Unused by game, See CSW_GLOCK18.
+	{ 2,  90, 0},// #define CSW_SCOUT           3
+	{12,   1, 3},// #define CSW_HEGRENADE       4
+	{ 5,  32, 0},// #define CSW_XM1014          5
+	{14,   1, 4},// #define CSW_C4              6
+	{ 6, 100, 0},// #define CSW_MAC10           7
+	{ 4,  90, 0},// #define CSW_AUG             8
+	{13,   1, 3},// #define CSW_SMOKEGRENADE    9
+	{10, 120, 1},// #define CSW_ELITE           10
+	{ 7, 100, 1},// #define CSW_FIVESEVEN       11
+	{ 6, 100, 0},// #define CSW_UMP45           12
+	{ 4,  90, 0},// #define CSW_SG550           13
+	{ 4,  90, 0},// #define CSW_GALIL           14
+	{ 4,  90, 0},// #define CSW_FAMAS           15
+	{ 6, 100, 1},// #define CSW_USP             16
+	{10, 120, 1},// #define CSW_GLOCK18         17
+	{ 1,  30, 0},// #define CSW_AWP             18
+	{10, 120, 0},// #define CSW_MP5NAVY         19
+	{ 3, 200, 0},// #define CSW_M249            20
+	{ 5,  32, 0},// #define CSW_M3              21
+	{ 4,  90, 0},// #define CSW_M4A1            22
+	{10, 120, 0},// #define CSW_TMP             23
+	{ 2,  90, 0},// #define CSW_G3SG1           24
+	{11,   2, 3},// #define CSW_FLASHBANG       25
+	{ 8,  35, 1},// #define CSW_DEAGLE          26
+	{ 4,  90, 0},// #define CSW_SG552           27
+	{ 2,  90, 0},// #define CSW_AK47            28
+	{-1,  -1, 3},// #define CSW_KNIFE           29
+	{ 7, 100, 0},// #define CSW_P90             30
+};
+
+enum MSGID
+{
+	HIDE_WEAPON,
+	WEAPON_LIST,
+	SET_FOV,
+	CUR_WEAPON,
+}
+
 new
 	g_crosshair_type[MAX_PLAYERS + 1],
 	g_crosshair_color[MAX_PLAYERS + 1],
 	bool:g_scope[MAX_PLAYERS + 1],
-	g_msgids[4];
+	g_msgids[MSGID];
 
-new g_cvar_sniper;
+new g_cvar_sniper = 0;
 
 public plugin_init() 
 {
@@ -46,15 +90,15 @@ public plugin_init()
 	register_clcmd("say /cross", "@clcmd_crosshair");
 
 	register_event("SetFOV", "@Event_SetFOV", "be");
-	register_event("CurWeapon", "@Event_CurWeapon", "be", "1=1", "2!18");
+	register_event("CurWeapon", "@Event_CurWeapon", "be", "1=1");
 
 	// Crosshair on Snipers. 
 	bind_pcvar_num(create_cvar("crosshair_snipers", "0"), g_cvar_sniper);
 
-	g_msgids[0]   = get_user_msgid("HideWeapon");
-	g_msgids[1]   = get_user_msgid("WeaponList");
-	g_msgids[2]   = get_user_msgid("SetFOV");
-	g_msgids[3]   = get_user_msgid("CurWeapon");
+	g_msgids[HIDE_WEAPON]   = get_user_msgid("HideWeapon");
+	g_msgids[WEAPON_LIST]   = get_user_msgid("WeaponList");
+	g_msgids[SET_FOV]   	= get_user_msgid("SetFOV");
+	g_msgids[CUR_WEAPON]  	= get_user_msgid("CurWeapon");
 }
 
 @Event_SetFOV(const id) 
@@ -185,95 +229,25 @@ Calc(const arg, const max, const min)
 
 Change_Crosshair(const id, const weapon, const zoom = 90) 
 {
-	switch(weapon) 
+	if (!g_cvar_sniper)
 	{
-		case CSW_P228: 
-			SetMessage_WeaponList(id, 9, 52);
-		case CSW_SCOUT:
-			if (g_cvar_sniper)
-			{
-				SetMessage_WeaponList(id, 2, 90);
-			}
-		case CSW_HEGRENADE: 
-			SetMessage_WeaponList(id, 12, 1);
-		case CSW_XM1014: 
-			SetMessage_WeaponList(id, 5, 32);
-		case CSW_C4: 
-			SetMessage_WeaponList(id, 14, 1);
-		case CSW_MAC10: 
-			SetMessage_WeaponList(id, 6, 100);
-		case CSW_AUG: 
-			SetMessage_WeaponList(id, 4, 90);
-		case CSW_SMOKEGRENADE: 
-			SetMessage_WeaponList(id, 13, 1);
-		case CSW_ELITE: 
-			SetMessage_WeaponList(id, 10, 120);
-		case CSW_FIVESEVEN: 
-			SetMessage_WeaponList(id, 7, 100);
-		case CSW_SG550:
-			if (g_cvar_sniper)
-			{
-				SetMessage_WeaponList(id, 4, 90);
-			}
-		case CSW_UMP45: 
-			SetMessage_WeaponList(id, 6, 100);
-		case CSW_GALIL: 
-			SetMessage_WeaponList(id, 4, 90);
-		case CSW_FAMAS: 
-			SetMessage_WeaponList(id, 4, 90);
-		case CSW_USP: 
-			SetMessage_WeaponList(id, 6, 100);
-		case CSW_GLOCK18: 
-			SetMessage_WeaponList(id, 10, 120);
-		case CSW_AWP:
-			if (g_cvar_sniper)
-			{
-				SetMessage_WeaponList(id, 1, 30);
-			}
-		case CSW_MP5NAVY: 
-			SetMessage_WeaponList(id, 10, 120);
-		case CSW_M249: 
-			SetMessage_WeaponList(id, 3, 200);
-		case CSW_M3: 
-			SetMessage_WeaponList(id, 5, 32);
-		case CSW_M4A1: 
-			SetMessage_WeaponList(id, 4, 90);
-		case CSW_TMP: 
-			SetMessage_WeaponList(id, 10, 120);
-		case CSW_G3SG1:
-			if (g_cvar_sniper)
-			{
-				SetMessage_WeaponList(id, 2, 90);
-			}
-		case CSW_FLASHBANG: 
-			SetMessage_WeaponList(id, 11, 2);
-		case CSW_DEAGLE: 
-			SetMessage_WeaponList(id, 8, 35);
-		case CSW_SG552: 
-			SetMessage_WeaponList(id, 4, 90);
-		case CSW_AK47: 
-			SetMessage_WeaponList(id, 2, 90);
-		case CSW_KNIFE: 
-			SetMessage_WeaponList(id, -1, -1);
-		case CSW_P90: 
-			SetMessage_WeaponList(id, 7, 100);
-		default: 
+		if (weapon == CSW_AWP || weapon == CSW_SCOUT || weapon == CSW_SG550 || weapon == CSW_G3SG1)
 			return;
 	}
-
+	SetMessage_WeaponList(id, weapon);
 	SetMessage_HideWeapon(id, 1<<6);
 	SetMessage_SetFOV(id, zoom - 1);
 	SetMessage_CurWeapon(id);
 	SetMessage_SetFOV(id, zoom);
 }
 
-SetMessage_WeaponList(const id, const pAmmoId, const pAmmoMaxAmount) 
+SetMessage_WeaponList(const id, const wpnId) 
 {
-	message_begin(MSG_ONE, g_msgids[1], .player = id); 
+	message_begin(MSG_ONE, g_msgids[WEAPON_LIST], .player = id); 
 	{
 		write_string(crosshairs[g_crosshair_type[id] - 1][g_crosshair_color[id] + 1]);
-		write_byte(pAmmoId);
-		write_byte(pAmmoMaxAmount);
+		write_byte(gAmmo[wpnId][0]);
+		write_byte(gAmmo[wpnId][1]);
 		write_byte(-1);
 		write_byte(-1);
 		write_byte(0);
@@ -286,7 +260,7 @@ SetMessage_WeaponList(const id, const pAmmoId, const pAmmoMaxAmount)
 
 SetMessage_SetFOV(const id, const FOV) 
 {
-	message_begin(MSG_ONE, g_msgids[2], .player = id); 
+	message_begin(MSG_ONE, g_msgids[SET_FOV], .player = id); 
 	{
 		write_byte(FOV);
 	}
@@ -298,7 +272,7 @@ SetMessage_CurWeapon(const id)
 	new ammo;
 	get_user_weapon(id, ammo);
 
-	message_begin(MSG_ONE, g_msgids[3], .player = id); 
+	message_begin(MSG_ONE, g_msgids[CUR_WEAPON], .player = id); 
 	{
 		write_byte(1);
 		write_byte(2);
@@ -309,7 +283,7 @@ SetMessage_CurWeapon(const id)
 
 SetMessage_HideWeapon(const id, const byte) 
 {
-	message_begin(MSG_ONE, g_msgids[0], .player = id); 
+	message_begin(MSG_ONE, g_msgids[HIDE_WEAPON], .player = id); 
 	{
 		write_byte(byte);
 	}
