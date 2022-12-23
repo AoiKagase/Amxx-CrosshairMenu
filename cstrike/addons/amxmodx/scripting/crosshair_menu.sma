@@ -133,7 +133,6 @@ public plugin_precache()
 		for(new a = 1; a < sizeof(crosshairs[]); a++) 
 			precache_generic(fmt("sprites/%s.txt", crosshairs[i][a]));
 	}
-
 	precache_generic("sprites/recrosshair.spr");
 }
 
@@ -258,6 +257,24 @@ SetMessage_WeaponList(const id, const wpnId)
 	message_end();
 }
 
+// TMP BUG.
+ResetTMP_WeaponList(const id)
+{
+	message_begin(MSG_ONE, g_msgids[WEAPON_LIST], .player = id); 
+	{
+		write_string("weapon_tmp");
+		write_byte(gAmmo[CSW_TMP][0]);
+		write_byte(gAmmo[CSW_TMP][1]);
+		write_byte(-1);
+		write_byte(-1);
+		write_byte(0);
+		write_byte(0);
+		write_byte(CSW_TMP);
+		write_byte(0);
+	}
+	message_end();
+}
+
 SetMessage_SetFOV(const id, const FOV) 
 {
 	message_begin(MSG_ONE, g_msgids[SET_FOV], .player = id); 
@@ -270,7 +287,11 @@ SetMessage_SetFOV(const id, const FOV)
 SetMessage_CurWeapon(const id) 
 {
 	new ammo;
-	get_user_weapon(id, ammo);
+	new weapon = get_user_weapon(id, ammo);
+
+	// TMP BUG
+	if (weapon == CSW_TMP)
+		ResetTMP_WeaponList(id);
 
 	message_begin(MSG_ONE, g_msgids[CUR_WEAPON], .player = id); 
 	{
